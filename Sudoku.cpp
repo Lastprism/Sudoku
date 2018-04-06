@@ -31,6 +31,7 @@ private:
     int c[10][10];
     int b[10][10];
     int isPrint = 1;
+    int cnt = 0;
 public:
     Sudoku(){}
     Sudoku(int a[][10]);
@@ -42,10 +43,12 @@ public:
     void changeStatus(int x, int y, int i, int v);
     void init();
     int dfs(int x, int y);
+    void allAnswer(int x, int y);
     void solve();
     int hasAnswer();
     void zero();
     void setisPrint(int v = 1);
+    int getCnt();
 };
 Sudoku::Sudoku(int a[][10])
 {
@@ -142,6 +145,35 @@ int Sudoku::dfs(int x, int y)
     }
     return 0;
 }
+void Sudoku::allAnswer(int x, int y)
+{
+    //printf("x = %d y =%d\n",x,y);
+    if(y > SIZE)
+        x ++, y = 1;
+    if(x > SIZE)
+    {
+        if(isPrint)
+            printMap();
+        cnt++;
+        return ;
+    }
+    if(mp[x][y])
+        allAnswer(x,y+1);
+    else
+    {
+        for(int i = 1; i <= SIZE; i++)
+        {
+            if(check(x, y, i))
+            {
+                changeStatus(x, y, i, 1);
+                mp[x][y] = i;
+                allAnswer(x, y+1);
+                changeStatus(x, y, i, 0);
+                mp[x][y] = 0;
+            }
+        }
+    }
+}
 void Sudoku::solve()
 {
     if(!hasAnswer() || !dfs(1, 1))
@@ -157,7 +189,7 @@ int Sudoku::hasAnswer()
             if(mp[i][j])
             {
                 int x = mp[i][j];
-                int block = (i-1)/3*3 + (i-1)/3 + 1;
+                int block = (i-1)/3*3 + (j-1)/3 + 1;
                 if(r[i][x])
                     return 0;
                 if(c[j][x])
@@ -177,14 +209,21 @@ void Sudoku::zero()
     memset(r,0,sizeof r);
     memset(c,0,sizeof c);
     memset(b,0,sizeof b);
+    cnt = 0;
 }
 void Sudoku::setisPrint(int v)
 {
     isPrint = v;
 }
+int Sudoku::getCnt()
+{
+    return cnt;
+}
 int main()
 {
     Sudoku s;
     s.getMapFromFile("shudu.txt");
+    s.init();
+//    s.setisPrint(0);
     s.solve();
 }
